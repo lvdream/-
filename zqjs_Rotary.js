@@ -6,7 +6,7 @@
 中青极速版大转盘抽奖
 ---
 继承Leaf大的变量【zqkdFastCookie】
-
+UA可以自己改，我这个UA是自己用的
 一天多少次还不知道，可以每两小时一次
 05 9-15 * * *
 
@@ -18,7 +18,7 @@ let jsb_cookie = $.isNode() ? (process.env.zqkdFastCookie ? process.env.zqkdFast
 let jsb_cookieArr = []
 let jsb_cookies = ""
 let _header = {
-    'User-Agent': 'Mozilla/5.0 (Linux; Android 5.1; OPPO R9tm Build/LMY47I; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/43.0.2357.121 Mobile Safari/537.36 hap/1.0.8.1/oppo com.nearme.instant.platform/4.2.1 com.youth.kandianquickapp/2.5.5 ({"packageName":"com.oppo.launcher","type":"shortcut","extra":{"original":{"packageName":"com.oppo.market","type":"sdk","extra":{}},"scene":"api"}})',
+    'User-Agent': 'Mozilla/5.0 (Linux; Android 10; LM-V350N Build/QKQ1.191222.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/83.0.4103.106 Mobile Safari/537.36 hap/1078/huawei com.huawei.fastapp/3.1.2.311 com.youth.kandianquickapp/2.5.5 ({"type":"shortcut","packageName":"com.lge.launcher3","extra":{"scene":"api"}})',
     'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
     'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
     'Host': 'user.youth.cn',
@@ -54,9 +54,9 @@ Object.keys(jsb_cookies).forEach((item) => {
         $.message = ""
         jsb_cookie1 = jsb_cookieArr[k];
         var time = Date.parse(new Date()).toString();
-        jsb_cookie1 + '&app_version=2.5.5&channel=c6001&os_version=29&active_channel=c6001&access=wifi&v=' + time
+        jsb_cookie1 += '&app_version=2.5.5&channel=c6001&os_version=29&is_wxaccount=0&active_channel=c6001&access=wifi&v=' + time
         console.log(`--------第 ${k + 1} 个账号转盘抽奖中--------\n`)
-        if (checkRotary(jsb_cookie1, time)) continue;
+        if (!checkRotary(jsb_cookie1, time)) continue;
         for (let k = 0; k < 20; k++) {
             time = Date.parse(new Date()).toString();
             await Rotary(jsb_cookie1, time)
@@ -78,7 +78,6 @@ function Rotary(jsb_cookie1, time) {
         }
         $.post(url, async (err, resp, data) => {
             try {
-                console.log(data)
                 const result = JSON.parse(data)
                 if (result.status === 1) {
                     if (result.data.score !== 0) {
