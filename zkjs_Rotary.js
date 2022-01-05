@@ -8,6 +8,7 @@
 继承Leaf大的变量【zqkdFastCookie】
 
 一天多少次还不知道，可以每两小时一次
+05 9-15/3 * * *
 
  */
 
@@ -16,6 +17,14 @@ message = ""
 let jsb_cookie = $.isNode() ? (process.env.zqkdFastCookie ? process.env.zqkdFastCookie : "") : ($.getdata('zqkdFastCookie') ? $.getdata('zqkdFastCookie') : "")
 let jsb_cookieArr = []
 let jsb_cookies = ""
+let _header = {
+    'User-Agent': 'Mozilla/5.0 (Linux; Android 5.1; OPPO R9tm Build/LMY47I; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/43.0.2357.121 Mobile Safari/537.36 hap/1.0.8.1/oppo com.nearme.instant.platform/4.2.1 com.youth.kandianquickapp/2.5.5 ({"packageName":"com.oppo.launcher","type":"shortcut","extra":{"original":{"packageName":"com.oppo.market","type":"sdk","extra":{}},"scene":"api"}})',
+    'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+    'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+    'Host': 'user.youth.cn',
+    'Connection': 'Keep-Alive',
+    'Accept-Encoding': 'gzip',
+}
 
 
 if (jsb_cookie) {
@@ -44,9 +53,12 @@ Object.keys(jsb_cookies).forEach((item) => {
     for (let k = 0; k < jsb_cookieArr.length; k++) {
         $.message = ""
         jsb_cookie1 = jsb_cookieArr[k];
+        var time = Date.parse(new Date()).toString();
+        jsb_cookie1 + '&app_version=2.5.5&channel=c6001&os_version=29&active_channel=c6001&access=wifi&v=' + time
         console.log(`--------第 ${k + 1} 个账号转盘抽奖中--------\n`)
+        if (checkRotary(jsb_cookie1, time)) continue;
         for (let k = 0; k < 20; k++) {
-            var time = Date.parse(new Date()).toString();
+            time = Date.parse(new Date()).toString();
             await Rotary(jsb_cookie1, time)
             await $.wait(6000);
         }
@@ -59,17 +71,9 @@ Object.keys(jsb_cookies).forEach((item) => {
 //抽奖
 function Rotary(jsb_cookie1, time) {
     return new Promise((resolve, reject) => {
-        jsb_cookie1 += '&app_version=2.5.5&channel=c6001&os_version=29&active_channel=c6001&access=wifi&v=' + time
         let url = {
             url: 'https://user.youth.cn/v1/RotaryTable/turnRotary?_=' + time,
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Linux; Android 5.1; OPPO R9tm Build/LMY47I; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/43.0.2357.121 Mobile Safari/537.36 hap/1.0.8.1/oppo com.nearme.instant.platform/4.2.1 com.youth.kandianquickapp/2.5.5 ({"packageName":"com.oppo.launcher","type":"shortcut","extra":{"original":{"packageName":"com.oppo.market","type":"sdk","extra":{}},"scene":"api"}})',
-                'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
-                'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
-                'Host': 'user.youth.cn',
-                'Connection': 'Keep-Alive',
-                'Accept-Encoding': 'gzip',
-            },
+            headers: _header,
             body: jsb_cookie1,
         }
         $.post(url, async (err, resp, data) => {
@@ -85,6 +89,32 @@ function Rotary(jsb_cookie1, time) {
                     }
                 } else {
                     console.log('\n抽奖失败，别问我，我也不知道为啥')
+                }
+            } catch (e) {
+                $.logErr(e + resp);
+            } finally {
+                resolve()
+            }
+        })
+    })
+}
+
+//检查是否可以抽奖
+function checkRotary(jsb_cookie1, time) {
+    return new Promise((resolve, reject) => {
+        let url = {
+            url: 'https://user.youth.cn/v1/RotaryTable/getData?_=' + time,
+            headers: _header,
+            body: jsb_cookie1,
+        }
+        $.post(url, async (err, resp, data) => {
+            try {
+                const result = JSON.parse(data)
+                if (result.status === 1) {
+                    console.log('\n抽奖失败，抽奖次数已经用完了，再等等吧')
+                    return false;
+                } else {
+                    return true;
                 }
             } catch (e) {
                 $.logErr(e + resp);
