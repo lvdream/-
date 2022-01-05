@@ -110,7 +110,7 @@ function checkRotary(jsb_cookie1, time) {
         $.post(url, async (err, resp, data) => {
             try {
                 const result = JSON.parse(data)
-                if (result.status === 1) {
+                if (result.data.remainTurn === 0) {
                     console.log('\n抽奖失败，抽奖次数已经用完了，再等等吧')
                     return false;
                 } else {
